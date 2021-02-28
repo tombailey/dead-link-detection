@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dead-link-detection
+spec:
+  selector:
+    matchLabels:
+      app: dead-link-detection
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: dead-link-detection
+    spec:
+      containers:
+        - name: dead-link-detection
+          image: tombailey256/dead-link-detection:0.1.0 #you may want to use a different tag for your app
+          env:
+            - name: PORT
+              value: "8080"
+          resources:
+            requests:
+              memory: "512Mi"
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dead-link-detection
+  labels:
+    app: dead-link-detection
+spec:
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
