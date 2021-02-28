@@ -1,4 +1,4 @@
-/t# Dead Link Detection
+# Dead Link Detection
 
 A simple nodejs app to detect broken links. It makes use of [puppeteer](https://github.com/puppeteer/puppeteer) to launch a headless Chrome browser instance to test links.
 
