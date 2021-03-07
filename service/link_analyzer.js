@@ -1,4 +1,19 @@
 class LinkAnalyzerService {
+  static CONTENT_MISSING_HINTS = [
+    'not found',
+    'page doesn’t exist',
+    `page doesn't exist`,
+    'page does not exist',
+    'page you’re looking for isn’t here',
+    `page you're looking for isn't here`,
+    'this account doesn’t exist',
+    `this account doesn't exist`,
+    `we can't find that page`,
+    'we can’t find that page',
+    'that content is unavailable',
+    'the page is broken',
+  ];
+
   constructor(
     browser,
     LinkAnalysis = require('../model/link_analysis')
@@ -9,14 +24,18 @@ class LinkAnalyzerService {
 
   async analyze(link) {
     try {
-      const response = await this.visit(link);
+      const {
+        page,
+        response,
+      } = await this.visit(link);
       if (response == null) {
         //about:blank treated as an error
         return this.LinkAnalysis.NETWORK_ERROR;
       } else if (!response.ok()) {
         return (response.status() === 404 || response.status() === 410) ? this.LinkAnalysis.CONTENT_MISSING : this.LinkAnalysis.NETWORK_ERROR;
+      } else if (await this.htmlSuggestsContentIsMissing(page)) {
+        return this.LinkAnalysis.CONTENT_MISSING;
       } else {
-        //TODO: check title/body for "not found" and similar text
         return this.LinkAnalysis.WORKING;
       }
     } catch (error) {
@@ -26,6 +45,16 @@ class LinkAnalyzerService {
       } else {
         throw error;
       }
+    }
+  }
+
+  async htmlSuggestsContentIsMissing(page) {
+    const title = (await page.title()).toLowerCase();
+    if (LinkAnalyzerService.CONTENT_MISSING_HINTS.some(contentMissingHint => title.includes(contentMissingHint))) {
+      return true;
+    } else {
+      const body = await page.$eval('body',(body) => body.innerText.toLowerCase());
+      return LinkAnalyzerService.CONTENT_MISSING_HINTS.some(contentMissingHint => body.includes(contentMissingHint));
     }
   }
 
@@ -46,7 +75,11 @@ class LinkAnalyzerService {
 
   async visit(link) {
     const page = await this.browser.newPage();
-    return page.goto(link);
+    return  page.goto(link, {
+      waitUntil: 'networkidle2',
+    }).then((response) => {
+      return {page, response};
+    });
   }
 }
 

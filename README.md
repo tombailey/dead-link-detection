@@ -107,8 +107,6 @@ Send a GET request to `/health` and expect a response with a 200 status code and
 
 The following items are desirable features for the future:
 
-- analyze the HTML returned from seemingly okay pages to check they aren't actually broken 
-    - e.g. 200 status code -> client-side rendering/AJAX request -> "not found" in HTML
 - grpc support
 - prometheus metrics support
 - CI/CD for automated testing and docker image pushes
