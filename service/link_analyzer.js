@@ -14,11 +14,7 @@ class LinkAnalyzerService {
         //about:blank treated as an error
         return this.LinkAnalysis.NETWORK_ERROR;
       } else if (!response.ok()) {
-        if (response.status() === 404) {
-          return this.LinkAnalysis.CONTENT_MISSING;
-        } else {
-          return this.LinkAnalysis.NETWORK_ERROR;
-        }
+        return (response.status() === 404 || response.status() === 410) ? this.LinkAnalysis.CONTENT_MISSING : this.LinkAnalysis.NETWORK_ERROR;
       } else {
         //TODO: check title/body for "not found" and similar text
         return this.LinkAnalysis.WORKING;
