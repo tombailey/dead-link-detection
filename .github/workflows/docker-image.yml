@@ -1,0 +1,26 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Extract version
+      id: extract_version
+      uses: Saionaro/extract-package-version@v1.0.6
+    - name: Login for registry
+      run: echo "$DOCKER_HUB_ACCESS_TOKEN" | docker login -u tombailey256 --password-stdin
+      env:
+        DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag tombailey256/dead-link-detection:${{ steps.extract_version.outputs.version }}
+    - name: Push the docker image
+      run: docker push tombailey256/dead-link-detection:${{ steps.extract_version.outputs.version }}
+      
