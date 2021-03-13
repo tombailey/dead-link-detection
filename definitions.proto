@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+service LinkAnalyzerService {
+  rpc Analyze (AnalysisRequest) returns (LinkAnalysis) {}
+}
+
+message AnalysisRequest {
+  string link = 1;
+}
+
+enum LinkStatus {
+  WORKING = 0;
+  CONTENT_MISSING = 1;
+  DNS_ERROR = 2;
+  CERT_ERROR = 3;
+  NETWORK_ERROR = 4;
+}
+
+message LinkAnalysis {
+  string status = 1;
+  bool consideredBroken = 2;
+  optional bool isLikelyTemporaryIssue = 3;
+}

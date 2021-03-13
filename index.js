@@ -1,22 +1,21 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
-const { LinkController, HealthController } = require('./controller');
-const errorHandler = require('./middleware').error.handler;
+const grpc = require('grpc');
+const protoLoader = require('@grpc/proto-loader');
+
+const { LinkRestController, HealthRestController } = require('./controller/rest');
+const { LinkGrpcController } = require('./controller/grpc');
+const restErrorHandler = require('./exception').restErrorHandler;
 
 const LinkAnalyzerService = require('./service/link_analyzer');
 
 async function init() {
-  const expressApp = setupExpress();
   const browser = await setupBrowser();
-  addHandlers(expressApp, new LinkAnalyzerService(browser));
-  listen(expressApp);
-}
+  const linkAnalyzerService = new LinkAnalyzerService(browser)
 
-function setupExpress() {
-  const expressApp = express();
-  expressApp.use(bodyParser.json());
-  return expressApp;
+  setupExpress(linkAnalyzerService);
+  setupGrpc(linkAnalyzerService);
 }
 
 function setupBrowser(
@@ -25,20 +24,46 @@ function setupBrowser(
   return puppeteer.launch();
 }
 
-function addHandlers(expressApp, linkAnalyzer) {
-  new LinkController(linkAnalyzer).registerHandlers(expressApp);
-  new HealthController().registerHandlers(expressApp);
+function setupExpress(linkAnalyzer, port=process.env.REST_PORT) {
+  const expressApp = express();
+  expressApp.use(bodyParser.json());
 
-  expressApp.use(errorHandler);
-}
+  new LinkRestController(linkAnalyzer).registerHandlers(expressApp);
+  new HealthRestController().registerHandlers(expressApp);
 
-function listen(expressApp, port=process.env.PORT) {
+  expressApp.use(restErrorHandler);
+
   if (port) {
     expressApp.listen(port);
   } else {
-    console.warn('$PORT was not set so 8080 was assumed');
+    console.warn('$REST_PORT was not set so 8080 was assumed');
     expressApp.listen(8080);
   }
+
+  return expressApp;
+}
+
+function setupGrpc(linkAnalyzerService, port=process.env.GRPC_PORT) {
+  const packageDefinition = protoLoader.loadSync('./definitions.proto', {
+    keepCase: true,
+    enums: String
+  });
+  const definitions = grpc.loadPackageDefinition(packageDefinition);
+
+  const server = new grpc.Server();
+
+  const linkGrpcController = new LinkGrpcController(linkAnalyzerService);
+  server.addService(definitions.LinkAnalyzerService.service, {
+    analyze: linkGrpcController.handleAnalyzeLink
+  });
+
+  if (port) {
+    server.bind(`localhost:${port}`, grpc.ServerCredentials.createInsecure());
+  } else {
+    console.warn('$GRPC_PORT was not set so 8081 was assumed');
+    server.bind('localhost:8081', grpc.ServerCredentials.createInsecure());
+  }
+  server.start();
 }
 
 init();

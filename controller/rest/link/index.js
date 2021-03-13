@@ -1,9 +1,9 @@
-const InvalidLinkAnalysisRequestException = require('../../exception/invalid_link_analysis_request');
+const { InvalidLinkAnalysisRequestException } = require('../../../exception');
 
-class LinkController {
+class LinkRestController {
   constructor(
     linkAnalyzer,
-    validator = require('../../validator')
+    validator = require('../../../validator')
   ) {
     this.linkAnalyzer = linkAnalyzer;
     this.validator = validator
@@ -29,4 +29,4 @@ class LinkController {
   }
 }
 
-module.exports = LinkController;
+module.exports = LinkRestController;

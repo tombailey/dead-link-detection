@@ -31,6 +31,8 @@ If your request is valid, you should expect a response like:
 }
 ```
 
+You can also connect using [GRPC](https://grpc.io/) on localhost:8081.
+
 See [Responses](#Responses) for a full list of responses.
 
 ## Responses
@@ -107,6 +109,5 @@ Send a GET request to `/health` and expect a response with a 200 status code and
 
 The following items are desirable features for the future:
 
-- grpc support
 - prometheus metrics support
 - CI/CD for automated testing and docker image pushes

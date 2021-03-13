@@ -1,16 +1,17 @@
+const InvalidLinkAnalysisRequestException = require('../invalid_link_analysis_request');
+
 const uuid = require('uuid').v4;
-const InvalidLinkAnalysisRequestException = require('../../exception/invalid_link_analysis_request');
+
+function isRecognizedError(error) {
+  return error instanceof InvalidLinkAnalysisRequestException;
+}
 
 function handler(error, _, response, __) {
-  if (isRecognisedError(error)) {
+  if (isRecognizedError(error)) {
     handleRecognisedError(error, response);
   } else {
     handleUnrecognisedError(error, response);
   }
-}
-
-function isRecognisedError(error) {
-  return error instanceof InvalidLinkAnalysisRequestException;
 }
 
 function handleRecognisedError(error, response) {
@@ -39,7 +40,6 @@ function handleUnrecognisedError(error, response) {
 
 module.exports = {
   handler,
-  isRecognisedError,
   handleRecognisedError,
   handleUnrecognisedError,
 };

@@ -1,6 +1,6 @@
 const ControllerInterface = require('../interface');
 
-class HealthController extends ControllerInterface {
+class HealthRestController extends ControllerInterface {
   registerHandlers(expressApp) {
     expressApp.get('/health', this.handleCheckHealth.bind(this));
   }
@@ -10,4 +10,4 @@ class HealthController extends ControllerInterface {
   }
 }
 
-module.exports = HealthController;
+module.exports = HealthRestController;
