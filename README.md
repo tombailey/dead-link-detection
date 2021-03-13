@@ -110,4 +110,4 @@ Send a GET request to `/health` and expect a response with a 200 status code and
 The following items are desirable features for the future:
 
 - prometheus metrics support
-- CI/CD for automated testing and docker image pushes
+- add automated testing to CI/CD pipeline
