@@ -75,7 +75,7 @@ class LinkAnalyzerService {
 
   async visit(link) {
     const page = await this.browser.newPage();
-    return  page.goto(link, {
+    return page.goto(link, {
       waitUntil: 'networkidle2',
     }).then((response) => {
       return {page, response};
